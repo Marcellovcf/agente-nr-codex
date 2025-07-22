@@ -32,7 +32,7 @@ async def receber_whatsapp(request: Request):
     body = await request.json()
 
     try:
-        mensagem = body["message"]["body"]
+        mensagem = body["message"]["text"]
         numero = body["message"]["from"]
     except KeyError:
         print("❌ Formato inesperado recebido:", body)
