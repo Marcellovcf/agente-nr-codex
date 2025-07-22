@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
-from search_engine import search_question
+from src.search_engine import search_question
 from openai import OpenAI
 import os
 
