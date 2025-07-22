@@ -35,6 +35,7 @@ async def receber_whatsapp(request: Request):
         mensagem = body["message"]["body"]
         numero = body["message"]["from"]
     except KeyError:
+        print("❌ Formato inesperado recebido:", body)
         return {"erro": "Formato inesperado"}
 
     print(f"📩 Mensagem recebida de {numero}: {mensagem}")
@@ -51,6 +52,7 @@ async def receber_whatsapp(request: Request):
     )
 
     resposta_final = resposta.choices[0].message.content
+    print(f"🤖 Resposta gerada: {resposta_final}")
 
     zapi_url = os.getenv("ZAPI_URL")
     payload = {
@@ -58,15 +60,18 @@ async def receber_whatsapp(request: Request):
         "message": resposta_final
     }
 
+    print(f"📤 Enviando para ZAPI: {payload}")
+    print(f"🔗 URL ZAPI: {zapi_url}")
+
     try:
-        zap_resp = requests.post(zapi_url, json=payload)
-        print(f"✅ Resposta enviada para {numero}: {resposta_final}")
-        print(f"📦 Z-API Status: {zap_resp.status_code}, Body: {zap_resp.text}")
+        res = requests.post(zapi_url, json=payload)
+        print(f"📦 Status Code: {res.status_code}")
+        print(f"📦 Resposta da Z-API: {res.text}")
     except Exception as e:
-        print(f"❌ Erro ao enviar resposta via ZAPI: {e}")
+        print(f"❌ Erro ao enviar resposta via Z-API: {e}")
 
     return {"status": "mensagem enviada"}
-    
+
 @app.get("/")
 def root():
     return {"mensagem": "Agente NR rodando com sucesso!"}
