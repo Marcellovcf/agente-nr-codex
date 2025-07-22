@@ -66,3 +66,7 @@ async def receber_whatsapp(request: Request):
         print(f"❌ Erro ao enviar resposta via ZAPI: {e}")
 
     return {"status": "mensagem enviada"}
+    
+@app.get("/")
+def root():
+    return {"mensagem": "Agente NR rodando com sucesso!"}
