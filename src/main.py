@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from src.search_engine import search_question
 from openai import OpenAI
 import os
-import uvicorn
+import requests
 
 app = FastAPI()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -14,7 +14,7 @@ class Pergunta(BaseModel):
 @app.post("/perguntar")
 async def perguntar(pergunta: Pergunta):
     trechos = search_question(pergunta.texto, k=12)
-    contexto = "\n\n".join([f"{i+1}. {trecho['texto']}" for i, trecho in enumerate(trechos)])
+    contexto = "\n\n".join([f"{i+1}. {trecho['content']}" for i, trecho in enumerate(trechos)])
 
     prompt = f"Responda à pergunta com base nos trechos abaixo.\n\nTrechos:\n{contexto}\n\nPergunta: {pergunta.texto}\nResposta:"
 
@@ -37,9 +37,10 @@ async def receber_whatsapp(request: Request):
     except KeyError:
         return {"erro": "Formato inesperado"}
 
-    # Responder usando o search_question e o modelo
+    print(f"📩 Mensagem recebida de {numero}: {mensagem}")
+
     trechos = search_question(mensagem, k=12)
-    contexto = "\n\n".join([f"{i+1}. {trecho['texto']}" for i, trecho in enumerate(trechos)])
+    contexto = "\n\n".join([f"{i+1}. {trecho['content']}" for i, trecho in enumerate(trechos)])
 
     prompt = f"Responda à pergunta com base nos trechos abaixo.\n\nTrechos:\n{contexto}\n\nPergunta: {mensagem}\nResposta:"
 
@@ -51,17 +52,17 @@ async def receber_whatsapp(request: Request):
 
     resposta_final = resposta.choices[0].message.content
 
-    # Enviar resposta de volta via Z-API
-    import requests
-    zapi_url = os.getenv("ZAPI_URL")  # exemplo: https://api.z-api.io/instances/{instance}/token/{token}/send-text
+    zapi_url = os.getenv("ZAPI_URL")
     payload = {
         "phone": numero,
         "message": resposta_final
     }
-    requests.post(zapi_url, json=payload)
+
+    try:
+        zap_resp = requests.post(zapi_url, json=payload)
+        print(f"✅ Resposta enviada para {numero}: {resposta_final}")
+        print(f"📦 Z-API Status: {zap_resp.status_code}, Body: {zap_resp.text}")
+    except Exception as e:
+        print(f"❌ Erro ao enviar resposta via ZAPI: {e}")
 
     return {"status": "mensagem enviada"}
-
-# Para rodar localmente (opcional)
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host="0.0.0.0", port=10000)
