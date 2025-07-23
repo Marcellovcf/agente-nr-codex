@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from src.search_engine import search_question
@@ -10,7 +11,13 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class Pergunta(BaseModel):
     texto: str
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ou restrinja depois para domínios específicos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.post("/perguntar")
 async def perguntar(pergunta: Pergunta):
     trechos = search_question(pergunta.texto, k=12)
