@@ -21,7 +21,7 @@ app.add_middleware(
 @app.post("/perguntar")
 async def perguntar(pergunta: Pergunta):
     trechos = search_question(pergunta.texto, k=12)
-    contexto = "\n\n".join([f"{i+1}. {trecho['content']}" for i, trecho in enumerate(trechos)])
+    contexto = "\n\n".join([f"{i+1}. {trecho['text']}" for i, trecho in enumerate(trechos)])
 
     prompt = f"Responda à pergunta com base nos trechos abaixo.\n\nTrechos:\n{contexto}\n\nPergunta: {pergunta.texto}\nResposta:"
 
@@ -48,7 +48,7 @@ async def receber_whatsapp(request: Request):
     print(f"📩 Mensagem recebida de {numero}: {mensagem}")
 
     trechos = search_question(mensagem, k=12)
-    contexto = "\n\n".join([f"{i+1}. {trecho['content']}" for i, trecho in enumerate(trechos)])
+    contexto = "\n\n".join([f"{i+1}. {trecho['text']}" for i, trecho in enumerate(trechos)])
 
     prompt = f"Responda à pergunta com base nos trechos abaixo.\n\nTrechos:\n{contexto}\n\nPergunta: {mensagem}\nResposta:"
 
