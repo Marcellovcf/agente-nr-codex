@@ -33,7 +33,7 @@ async def receber_whatsapp(request: Request):
 
     try:
         mensagem = body["message"]["text"]
-        numero = body["message"]["from"]
+        numero = body["connectedPhone"]
     except KeyError:
         print("❌ Formato inesperado recebido:", body)
         return {"erro": "Formato inesperado"}
